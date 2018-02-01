@@ -1,10 +1,11 @@
 # -*- coding:UTF-8 -*-
 '''
-aaa
+selenium使用demo, 为webdriver设置header,自带选择器/BeautifulSoup选择器的使用，自带选择器异常处理
 '''
 import time
 from bs4 import BeautifulSoup
 from selenium import webdriver
+from selenium.common.exceptions import NoSuchElementException
 
 if __name__ == '__main__':
     OPT = webdriver.ChromeOptions()
@@ -17,31 +18,29 @@ if __name__ == '__main__':
     BF1 = BeautifulSoup(MYHTML, 'lxml')
     TITLE = BF1.select("div.doc-title")[0].string
     print('文章标题：%s' % TITLE)
-    JIA = 1
+    MORE_FLAG = 1
 
     while True:
-        TEXTS = DRIVER.find_elements_by_css_selector(
-            "div.content.singlePage div p")
+        TEXTS = DRIVER.find_elements_by_css_selector("div.content.singlePage div p")
         for each_text in TEXTS:
-            inner_text = DRIVER.execute_script(
-                "return arguments[0].innerText;", each_text)
+            inner_text = DRIVER.execute_script("return arguments[0].innerText;", each_text)
             print(inner_text + '\n')
-            #break
+            #break # 为了快速调试，只打印每页第一行
 
         #只有第一次需要“加载更多”
-        if JIA <= 1:
-            flod_button = DRIVER.find_element_by_xpath(
-                "//span[@class='fold-arrow-lower']")  # TODO 找不到会报错，尝试解决
-            flod_button.click()
-            JIA = 2
+        if MORE_FLAG <= 1:
+            MORE_BTN = DRIVER.find_element_by_xpath("//span[@class='fold-arrow-lower']")
+            MORE_BTN.click()
+            MORE_FLAG = 2
         #下一页
-        nextpage = DRIVER.find_element_by_xpath(
-            "//div[@class='x-page next']")   # TODO 找不到会报错，尝试解决
-        if nextpage:
-            print('==========next page==========\n')
-            DRIVER.execute_script(
-                'arguments[0].scrollIntoView(false);', nextpage)  # 拖动到可见的元素去
-            nextpage.click()
-            time.sleep(3)
-        else:
+        try:
+            NEXT_PG = DRIVER.find_element_by_xpath("//div[@class='x-page next']")   # 找不到会报错，添加异常处理
+        except NoSuchElementException as msg:
+            print(u"查找元素异常%s"%msg)
             break
+        else:
+            #print('==========next page==========\n')
+            DRIVER.execute_script('arguments[0].scrollIntoView(false);', NEXT_PG)  # 拖动到可见的元素去
+            NEXT_PG.click()
+            time.sleep(3)
+    #print(u"程序结束。")
