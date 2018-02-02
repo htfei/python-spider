@@ -50,7 +50,7 @@ class huoche(object):
 				break
 
 	def start(self):
-		self.driver = Browser(driver_name=self.driver_name,executable_path=self.executable_path)
+		self.driver = Browser(driver_name=self.driver_name) #,executable_path=self.executable_path)
 		self.driver.driver.set_window_size(1400, 1000)
 		self.login()
 		# sleep(1)
